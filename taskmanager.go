@@ -1,18 +1,18 @@
-package taskmanipulator
+package taskmanager
 
 import (
 	"encoding/json"
 	"fmt"
 )
 
-// Task represents a JSON object in an array.
+// Task 表示JSON数组中的一个对象
 type Task map[string]interface{}
 
-// TaskManipulator provides methods for manipulating tasks within a JSON array.
-type TaskManipulator struct{}
+// TaskManager 提供对JSON任务数组的操作接口
+type TaskManager struct{}
 
-// RemoveTaskByName removes a task from a JSON array by its name.
-func (tm *TaskManipulator) RemoveTaskByName(jsonStr string, name string) (string, error) {
+// RemoveTaskByName 从JSON数组中删除指定name的任务
+func (tm *TaskManager) RemoveTaskByName(jsonStr string, name string) (string, error) {
 	var tasks []Task
 	err := json.Unmarshal([]byte(jsonStr), &tasks)
 	if err != nil {
@@ -34,20 +34,20 @@ func (tm *TaskManipulator) RemoveTaskByName(jsonStr string, name string) (string
 	return string(updatedJSON), nil
 }
 
-// AddTask adds a new task to a JSON array.
-func (tm *TaskManipulator) AddTask(jsonStr string, newTask map[string]interface{}) (string, error) {
+// AddTask 向JSON数组中添加新的任务
+func (tm *TaskManager) AddTask(jsonStr string, newTask map[string]interface{}) (string, error) {
 	var tasks []map[string]interface{}
 	err := json.Unmarshal([]byte(jsonStr), &tasks)
 	if err != nil {
 		return "", err
 	}
 
-	// Check if the new task has a 'name' field
+	// 检查新任务是否包含name字段
 	if _, ok := newTask["name"]; !ok || newTask["name"] == "" {
 		return "", fmt.Errorf("new task must have a 'name' field")
 	}
 
-	// Check if a task with the same name already exists
+	// 检查jsonStr中是否已存在具有相同name字段的任务
 	for _, existingTask := range tasks {
 		if existingName, ok := existingTask["name"]; ok {
 			if existingName == newTask["name"] {
@@ -56,7 +56,7 @@ func (tm *TaskManipulator) AddTask(jsonStr string, newTask map[string]interface{
 		}
 	}
 
-	// Add the new task to the slice
+	// 添加新任务到切片
 	tasks = append(tasks, newTask)
 
 	updatedJSON, err := json.MarshalIndent(tasks, "", "  ")
@@ -67,20 +67,20 @@ func (tm *TaskManipulator) AddTask(jsonStr string, newTask map[string]interface{
 	return string(updatedJSON), nil
 }
 
-// UpdateTask updates an existing task in a JSON array.
-func (tm *TaskManipulator) UpdateTask(jsonStr string, updateTask map[string]interface{}) (string, error) {
+// UpdateTask 更新JSON数组中指定name的任务
+func (tm *TaskManager) UpdateTask(jsonStr string, updateTask map[string]interface{}) (string, error) {
 	var tasks []map[string]interface{}
 	err := json.Unmarshal([]byte(jsonStr), &tasks)
 	if err != nil {
 		return "", err
 	}
 
-	// Check if the update task has a 'name' field
+	// 检查新任务是否包含name字段
 	if _, ok := updateTask["name"]; !ok {
-		return "", fmt.Errorf("update task must have a 'name' field")
+		return "", fmt.Errorf("new task must have a 'name' field")
 	}
 
-	// Find and update the existing task
+	// 查找并更新已有任务
 	found := false
 	for i, task := range tasks {
 		if taskName, ok := task["name"].(string); ok && taskName == updateTask["name"].(string) {
